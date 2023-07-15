@@ -137,7 +137,7 @@ async def predict(predictionFeatures: PredictionFeatures):
         # Resultat
         rental_price_per_day = prediction.tolist()[0]
 
-        return {f"Prix ​​de location prédit par jour pour votre voiture: {round(rental_price_per_day, 2)} USD"}
+        return {f"Prix de location prédit par jour pour votre voiture: {round(rental_price_per_day, 2)} USD"}
     except Exception as e:
         return {"Error": f"Unexpected error: {str(e)}"}
 
