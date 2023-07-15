@@ -108,31 +108,39 @@ msg = """
 
 @app.post("/predict", tags=["ML-Model-Prediction"])
 async def predict(predictionFeatures: PredictionFeatures):
- 
-    if predictionFeatures.json:
+    try:
         # Conversion des donnees en dataframe
         df = pd.DataFrame(dict(predictionFeatures), index=[0])
-        
-        preprocessor = joblib.load('models/preprocessor.joblib') # preprocessing model
-        model = joblib.load('models/xgb_model.joblib') # xgboost model
+
+        try:
+            preprocessor = joblib.load('models/preprocessor.joblib') # preprocessing model
+        except Exception as e:
+            return {"Error": f"Could not load preprocessor: {str(e)}"}
+
+        try:
+            model = joblib.load('models/xgb_model.joblib') # xgboost model
+        except Exception as e:
+            return {"Error": f"Could not load model: {str(e)}"}
 
         try:
             # pretraitement
             processed_predictionFeatures = preprocessor.transform(df)
+        except Exception as e:
+            return {"Error": f"Error during preprocessing: {str(e)}"}
 
-            # application du model 
+        try:
+            # application du model
             prediction = model.predict(processed_predictionFeatures)
+        except Exception as e:
+            return {"Error": f"Error during prediction: {str(e)}"}
 
-            # Resultat
-            rental_price_per_day = prediction.tolist()[0]
-            
-            response = {f"Prix ​​de location prédit par jour pour votre voiture: {round(rental_price_per_day, 2)} USD"}
-        except:
-            response = json.dumps({"message": msg})
-        return response
-    else:
-        msg = json.dumps({"message": msg})
-        return msg
+        # Resultat
+        rental_price_per_day = prediction.tolist()[0]
+
+        return {f"Prix ​​de location prédit par jour pour votre voiture: {round(rental_price_per_day, 2)} USD"}
+    except Exception as e:
+        return {"Error": f"Unexpected error: {str(e)}"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=4000, debug=True, reload=True)
