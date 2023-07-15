@@ -3,6 +3,7 @@ import pandas as pd
 from pydantic import BaseModel
 from typing import Union
 import joblib
+import uvicorn
 import json
 
 # description will apear in the doc
